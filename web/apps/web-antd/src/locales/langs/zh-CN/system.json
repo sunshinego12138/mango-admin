@@ -1,0 +1,16 @@
+{
+  "menu": {
+    "title": "菜单管理"
+  },
+  "locales": {
+    "createTime": "创建时间",
+    "action": "操作",
+    "zhTW": "繁体中文",
+    "jaJP": "日文",
+    "enUS": "英文",
+    "zhCN": "中文",
+    "name": "国际化字段",
+    "title": "国际化"
+  },
+  "title": "系统管理"
+}

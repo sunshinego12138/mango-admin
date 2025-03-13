@@ -1,0 +1,172 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x", "debian-openssl-3.0.x", "darwin-arm64"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+  // connection_limit = 20 // 适当增加连接数（建议不超过数据库最大连接数的 70%）
+  // pool_timeout     = 30 // 超时时间从 10 秒增加到 30 秒
+}
+
+// 状态
+enum Status {
+  ACTIVE // 激活
+  INACTIVE // 没有激活
+}
+
+// 性别
+enum Sex {
+  FEMALE // 女性
+  MALE // 男性
+}
+
+// 菜单类型
+enum MenuType {
+  DIRECTORY // 目录
+  MENU // 菜单
+  BUTTON // 按钮
+}
+
+// 请求方法
+enum Method {
+  GET
+  POST
+  PUT
+  PATCH
+  DELETE
+}
+
+// 系统管理 - 用户管理
+model User {
+  id           String        @id @default(uuid()) // 主键
+  username     String        @unique // 用户名
+  password     String // 密码
+  realName     String? // 中文名
+  email        String?       @unique // 电子邮箱
+  phone        String?       @unique // 手机号
+  avatar       String? // 头像
+  sex          Sex?          @default(FEMALE) // 性别
+  status       Status        @default(ACTIVE) // 状态
+  sort         Int // 排序
+  roleId       String?
+  description  String? // 用户描述
+  role         Role?         @relation(fields: [roleId], references: [id])
+  loginCount   Int           @default(0) // 登录次数
+  lastIp       String? // 最后登录ip
+  lastLoginAt  DateTime? // 最后登录时间
+  messages     Message[] // 该用户发布的消息列表
+  messageReads MessageRead[] // 关联已读列表
+  createdAt    DateTime      @default(now()) // 创建时间
+  updatedAt    DateTime      @updatedAt // 更新时间
+  Log          Log[]
+
+  @@index([id])
+}
+
+// 系统管理 - 角色管理
+model Role {
+  id          String       @id @default(uuid()) // 主键
+  name        String       @unique
+  code        String       @unique // 角色编码
+  description String? // 角色描述
+  sort        Int // 排序
+  permissions Permission[] // 与Permission的一对多关系
+  users       User[] // 关联用户
+  createdAt   DateTime     @default(now()) // 创建时间
+  updatedAt   DateTime     @updatedAt // 更新时间
+}
+
+// 系统管理 - 权限管理
+model Permission {
+  id        String   @id @default(uuid()) // 主键
+  roleId    String // 角色ID
+  menuId    String // 菜单ID
+  createdAt DateTime @default(now()) // 创建时间
+  role      Role     @relation(fields: [roleId], references: [id]) // 与Role的关联
+  menu      Menu     @relation(fields: [menuId], references: [id]) // 与Menu的关联
+}
+
+// 系统管理 - 菜单管理
+model Menu {
+  id          String       @id @default(uuid()) // 主键
+  title       String // 菜单名称
+  // type        MenuType     @default(MENU) // 菜单类型
+  parentId    String?
+  parent      Menu?        @relation(name: "MenuHierarchy", fields: [parentId], references: [id])
+  name        String?      @unique // 路由名称
+  path        String?      @unique // 路由地址
+  component   String? // 组件路径
+  redirect    String? // 重定向
+  meta        Json? // 路由元信息（JSON 对象）
+  props       Json? // Iframe 页面参数（JSON 对象）
+  sort        Int // 排序
+  permission  String?      @unique // 权限标识
+  permissions Permission[] // 与Permission的一对多关系
+  children    Menu[]       @relation(name: "MenuHierarchy")
+  createdAt   DateTime     @default(now()) // 创建时间
+  updatedAt   DateTime     @updatedAt // 更新时间
+}
+
+// 消息公告
+model Message {
+  id           String        @id @default(uuid()) // 主键
+  title        String // 标题
+  content      String // 内容
+  status       Status        @default(ACTIVE) // 状态
+  pinned       Boolean       @default(false)
+  userId       String // 作者 id
+  user         User          @relation(fields: [userId], references: [id])
+  messageReads MessageRead[] // 关联已读列表
+  createdAt    DateTime      @default(now()) // 创建时间
+  updatedAt    DateTime      @updatedAt // 更新时间
+}
+
+// 消息公告 - 已读列表
+model MessageRead {
+  id        String   @id @default(uuid()) // 主键
+  messageId String // 消息 id
+  message   Message  @relation(fields: [messageId], references: [id])
+  userId    String // 用户 id
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now()) // 创建时间
+}
+
+// 系统管理 - 操作日志
+model Log {
+  id        String   @id @default(uuid()) // 主键
+  userId    String // 关联的用户 id
+  user      User     @relation(fields: [userId], references: [id])
+  ip        String // ip
+  action    String // 请求地址
+  method    Method // 请求方法
+  params    Json // 请求参数（JSON 对象）
+  os        String // 系统
+  browser   String // 浏览器
+  province  String? // 所在省份
+  city      String? // 所在城市
+  adcode    String? // 城市编码
+  createdAt DateTime @default(now()) // 创建时间
+}
+
+// 系统管理 - 国际化
+model Locales {
+  id        String    @id @default(uuid()) // 主键
+  name      String // 键
+  parentId  String?
+  parent    Locales?  @relation(name: "LocalesHierarchy", fields: [parentId], references: [id])
+  zhCN      String? // 中文
+  enUS      String? // 英文
+  jaJP      String? // 日文
+  zhTW      String? // 繁体中文
+  createdAt DateTime  @default(now()) // 创建时间
+  updatedAt DateTime  @updatedAt // 更新时间
+  children  Locales[] @relation(name: "LocalesHierarchy")
+}

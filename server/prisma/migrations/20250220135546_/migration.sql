@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE `User` MODIFY `email` VARCHAR(191) NULL,
+    MODIFY `phone` VARCHAR(191) NULL,
+    MODIFY `avatar` VARCHAR(191) NULL,
+    MODIFY `sex` ENUM('FEMALE', 'MALE') NULL DEFAULT 'FEMALE',
+    MODIFY `realName` VARCHAR(191) NULL;

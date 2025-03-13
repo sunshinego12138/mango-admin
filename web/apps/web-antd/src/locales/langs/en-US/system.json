@@ -1,0 +1,16 @@
+{
+  "menu": {
+    "title": "Menu Manager"
+  },
+  "locales": {
+    "createTime": "createTime",
+    "action": "Action",
+    "zhTW": "Traditional Chinese",
+    "jaJP": "Japanese",
+    "enUS": "English",
+    "zhCN": "Chinese",
+    "name": "Internationalization field",
+    "title": "Internationalization"
+  },
+  "title": "System Management"
+}
