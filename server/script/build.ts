@@ -28,7 +28,7 @@ async function copyNodeFiles() {
 }
 
 async function main() {
-  await $`bun run build:linux`
+  // await $`bun run build:linux`
   await copyNodeFiles()
 }
 

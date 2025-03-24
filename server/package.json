@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development bun run --watch ./src/index.ts",
     "test": "bun run --watch ./test/custom.test.ts",
-    "build:linux": "rm -rf ./dist/server && cross-env NODE_ENV=production bun build --compile --target=bun-linux-x64 --minify --sourcemap --bytecode ./index.ts --outfile dist/server",
+    "build": "rm -rf ./dist/server && cross-env NODE_ENV=production bun build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile dist/server && bun ./script/build.ts",
+    "build:linux": "rm -rf ./dist/server && cross-env NODE_ENV=production bun build --compile --target=bun-linux-x64 --minify --sourcemap --bytecode ./src/index.ts --outfile dist/server && bun ./script/build.ts",
     "db:dev": "prisma migrate dev",
     "db:generate": "prisma generate",
     "db:reset": "prisma migrate reset",
@@ -38,7 +39,7 @@
     "elysia-ip": "^1.0.8",
     "glob": "^11.0.1",
     "logestic": "^1.2.4",
-    "mango-core": "^0.0.8",
+    "mango-core": "^0.0.10",
     "mango-types": "^0.0.5",
     "reflect-metadata": "^0.2.2",
     "uuid": "^11.0.5"

@@ -10,7 +10,7 @@ const mango = MongoCore.init({
   version: '1.0.0',
   cors: true,
   swagger: {},
-  logger: true
+  logger: true,
 })
   .use(
     jwt({
